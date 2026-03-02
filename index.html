@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生涯損失査定マシン 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #00F5FF; --accent-pink: #FF007F; --yellow: #FFD700; --black: #1A1A1A; }
+        body { background-color: var(--bg-color); font-family: 'M PLUS Rounded 1c', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: background-color 0.5s ease; }
+        #app { width: 100%; max-width: 380px; background: #fff; border: 5px solid var(--black); border-radius: 30px; box-shadow: 10px 10px 0px var(--black); padding: 30px 20px; text-align: center; box-sizing: border-box; }
+        #quiz, #loading, #result { display: none; }
+        #quiz { display: block; }
+        h1 { font-size: 1.4rem; margin-bottom: 25px; line-height: 1.4; color: var(--black); }
+        .input-group { text-align: left; margin-bottom: 20px; }
+        label { font-size: 0.8rem; font-weight: 900; color: var(--black); margin-left: 5px; }
+        select, input { width: 100%; padding: 15px; border: 4px solid var(--black); border-radius: 15px; margin-top: 8px; font-size: 1.1rem; font-weight: 900; box-sizing: border-box; outline: none; background: #fff; }
+        .result-card { background: #fff; border: 4px solid var(--black); border-radius: 25px; padding: 40px 15px 20px; margin-bottom: 25px; position: relative; }
+        .result-label { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--yellow); color: var(--black); font-size: 0.9rem; padding: 6px 25px; border-radius: 50px; border: 4px solid var(--black); white-space: nowrap; box-shadow: 4px 4px 0px var(--black); }
+        #result-rank { font-size: 1.6rem; font-weight: 900; margin-bottom: 10px; }
+        .total-loss { font-size: 3.2rem; font-weight: 900; color: var(--accent-pink); line-height: 1; margin: 15px 0; text-shadow: 3px 3px 0px var(--black); word-break: break-all; }
+        .section-box { border-top: 4px solid var(--black); margin: 20px 0 10px; padding-top: 15px; text-align: left; }
+        .tag { color: #fff; font-size: 0.7rem; padding: 3px 12px; border-radius: 8px; border: 2px solid var(--black); display: inline-block; margin-bottom: 8px; font-weight: 900; }
+        .desc { font-size: 0.85rem; font-weight: 900; color: var(--black); line-height: 1.5; }
+        .share-btn { width: 100%; padding: 16px; border: 4px solid var(--black); border-radius: 50px; font-weight: 900; font-size: 1.1rem; cursor: pointer; background: #000; color: #fff; box-shadow: 0 6px 0px #444; transition: 0.1s; margin-bottom: 15px; display: block; text-decoration: none; border: none; font-family: inherit; }
+        .physics-button { width: 100%; padding: 14px; border: 4px solid var(--black); border-radius: 20px; font-weight: 900; cursor: pointer; background: var(--yellow); color: var(--black); box-shadow: 0 8px 0px var(--black); transition: 0.1s; display: block; text-decoration: none; box-sizing: border-box; text-align: center; margin-bottom: 15px; font-size: 1rem; }
+        .physics-button:active { transform: translateY(6px); box-shadow: 0 2px 0px var(--black); }
+        .btn-main { width: 100%; padding: 18px; border: 4px solid var(--black); border-radius: 50px; font-weight: 900; font-size: 1.1rem; background: var(--yellow); box-shadow: 0 6px 0px var(--black); cursor: pointer; font-family: inherit; }
+        .disclaimer { font-size: 0.6rem; color: #666; margin-top: 10px; font-weight: normal; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="quiz">
+        <h1>📱 生涯損失査定マシン<br><span style="font-size: 0.8rem;">[ 2026年度・最新複利版 ]</span></h1>
+        <div class="input-group">
+            <label>現在の年齢 (18歳〜80歳推奨)</label>
+            <input type="number" id="age" value="25" min="1" max="100">
+        </div>
+        <div class="input-group">
+            <label>1日のスマホ時間</label>
+            <select id="wasteTime">
+                <option value="1">1時間（まだ希望がある）</option>
+                <option value="3" selected>3時間（凡庸な浪費家）</option>
+                <option value="5">5時間（スマホの飼い犬）</option>
+                <option value="8">8時間（アルゴリズムの養分）</option>
+                <option value="12">12時間（ほぼ電子基板）</option>
+            </select>
+        </div>
+        <button class="btn-main" onclick="diagnose()">🔥 人生を解析する</button>
+    </div>
+    <div id="loading"><h2>💸 複利で絶望を計算中...</h2></div>
+    <div id="result">
+        <div class="result-card">
+            <div class="result-label">査定結果</div>
+            <div id="result-rank">---</div>
+            <div class="total-loss" id="totalLossDisplay">¥0</div>
+            <div class="section-box">
+                <span class="tag" style="background: var(--accent-pink);">本来なら…</span>
+                <div class="desc" id="achievementText"></div>
+            </div>
+            <div class="section-box">
+                <span class="tag" style="background: var(--bg-color); color: var(--black);">余計なお世話</span>
+                <div class="desc" id="jokeText" style="font-style: italic;"></div>
+            </div>
+            <div class="disclaimer">※この結果は概算です。現実はこれ以上に残酷な可能性があります。</div>
+        </div>
+        <button class="share-btn" onclick="shareX()">🐦 Xで恥を晒す</button>
+        <a href="https://www.buymeacoffee.com/ai_pick" target="_blank" class="physics-button">🙏 絶望のお礼をする</a>
+        
+        <a href="https://www.amazon.co.jp/gp/search?ie=UTF8&tag=aicheck-22&linkCode=ur2&linkId=diagnostic01&camp=247&creative=1211&index=aps&keywords=タイムロッキングコンテナ" 
+           target="_blank" class="physics-button" style="background: #000; color: #fff;">
+            📦 Amazonで脱出用アイテムを購入
+        </a>
+    </div>
+</div>
+
+<script>
+    const achs = {
+        low: ["最新のiPhoneを15台並べてドミノ倒しができました。","MacBook Proを5台買って全部スタバに置けました。","全国の有名ラーメンを1000杯食べ歩けました。","回らない寿司に100回通い詰められました。","全身脱毛を完了してツルツルになれました。","ディズニーホテルに1ヶ月間毎日泊まれました。","ゲーミングPCの最強構成を3台組めました。","ニンテンドースイッチを30台配って王様になれました。","高級サウナの年間パスポートを買って整い放題でした。","一人暮らしの家具を一新してデザイナーズ風にできました。","毎日スタバで一番高い呪文を3年唱えられました。","最新の電動自転車を買って爆走できました。","家中の家電をすべて最新のAI家電に置換できました。","自分の部屋を完全防音のスタジオに改造できました。","100万円分のビットコインを買って気絶できました。","日本中の温泉宿を20箇所巡る贅沢旅ができました。","一流のスーツを5着仕立ててデキる男になれました。","最高級の羽毛布団を買って一生快眠できました。","プロの家事代行を1年間、週2で呼べました。","Amazonの欲しいものリストを全部空にできました。"],
+        mid: ["フェラーリの中古車をキャッシュで購入できました。","世界一周旅行にファーストクラスで行けました。","地方に小さな古民家を買って隠居生活ができました。","私立大学の学費4年分を全額キャッシュで払えました。","ロレックスの激レアモデルを3本収集できました。","高級クラブでシャンパンタワーを3回建てられました。","自分のカフェをオープンする資金になりました。","47都道府県の最高級旅館をすべて制覇できました。","NASAの宇宙訓練プログラムに参加できました。","瀬戸内海に自分だけの無人島を買えたはずです。","エルメスのバーキンを5個並べて鑑賞できました。","家政婦さんを5年間雇って優雅に暮らせました。","自分の銅像を駅前広場に建てる許可が取れました。","1000万ドルの生命保険に一括加入できました。","10年間、毎日最高級の焼肉を食べ続けられました。","映画のスクリーンを1年間貸し切り状態にできました。","ポルシェの新型を新車で注文できました。","都市部のマンションの頭金として最強の武器でした。","一流シェフを自宅に呼んで毎日パーティーできました。","金1kgのインゴットを枕元に置いて寝られました。"],
+        high: ["港区タワマンの最上階をキャッシュで買えました。","プライベートジェットを10時間貸切にできました。","宇宙旅行のチケットをペアで予約できました。","プロ野球チームのスポンサーになれました。","ハワイにプール付きの別荘が2軒買えたはずです。","一生働かずに遊んで暮らせました。","最新のスーパーカーを5台コレクションできました。","自分の名前を冠した財団を設立できました。","国会議員に立候補する供託金を20回払えました。","純金10kgのインゴットを床に敷き詰められました。","ディズニーランドを1日貸し切って独占できました。","歴史に残る巨大な図書館を寄贈できました。","海外の永住権を投資ビザでお金で買えました。","100億円規模の企業の筆頭株主になれました。","銀座の高級バーを1ヶ月間貸し切りにできました。","自分の生涯を映画化してハリウッドに売れました。","最高級ワインのプライベートセラーが完成しました。","中世ヨーロッパの本物のお城を買い取れました。","一流のボディガードを一生雇って安全を買えました。","もはや、あなたがその地域の経済を回せました。"]
+    };
+    const jokes = ["液晶の光で光合成してるんですか？人生枯れてますよ。","指の筋肉だけはアスリートですね。脳は休眠中？","その1秒のスクロールで、GAFAの株価を支えるボランティアお疲れ様。","最新トレンドには詳しいのに、自分の残高には疎い。最高にクールです。","通知で震える姿、パブロフの犬そのものですね（笑）","死ぬ間際のセリフは「Wi-Fiが遅い」で決まり。","画面を消した時に映る自分の顔、直視できます？","「後でやる」の後ろは、もう寿命で満席ですよ。","デジタルデトックスの決意をSNSに書くタイプですよね。","AIに仕事を取られる前に、スマホに時間を奪われてる。","情報の波を泳いでるつもりが、実際は網の中の魚です。","10年前の自分に、今の姿を見せられますか？","充電器が生命維持装置ですか？","他人の幸せを覗き見て、自分の時間を泥にするプロ。","スクロールしすぎて指紋消えてませんか？","スマホの奴隷として、今日も1日頑張ってくださいね。","履歴書に「無限スクロール」って書くんですか？","ブルーライトで未来が霞んで見えなくなってる。","GAFAの養分として、徳を積んでいますね。","あなたの本編、いつ始まるんですか？他人の総集編ばかり観て。"];
+
+    function diagnose() {
+        const age = parseInt(document.getElementById('age').value);
+        const wasteTime = parseInt(document.getElementById('wasteTime').value);
+        if (isNaN(age) || age < 1 || age > 100) { alert('1歳から100歳の間で入力してください。'); return; }
+
+        document.getElementById('quiz').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+
+            // 2026年最新複利ロジック (年利5%想定・将来価値FV計算)
+            const avgLife = 85; 
+            const yearsLeft = Math.max(1, avgLife - age);
+            const hourlyWage = 1226; // 2026年3月時給実勢
+            const monthlyWaste = wasteTime * 30 * hourlyWage;
+            const r = 0.05 / 12; // 月利5%
+            const n = yearsLeft * 12; // 積立月数
+            const totalLoss = monthlyWaste * (Math.pow(1 + r, n) - 1) / r;
+
+            let displayMoney = totalLoss >= 100000000 ? (totalLoss / 100000000).toFixed(2) + "億円" : (Math.floor(totalLoss / 10000)).toLocaleString() + "万円";
+            document.getElementById('totalLossDisplay').innerText = `¥${displayMoney}`;
+
+            let rank = ""; let bg = "";
+            if (wasteTime >= 12) { rank = "電子基板の部品"; bg = "#FF007F"; }
+            else if (wasteTime >= 8) { rank = "アルゴリズムの養分"; bg = "#4A148C"; }
+            else if (wasteTime >= 5) { rank = "スマホの飼い犬"; bg = "#FF4500"; }
+            else if (wasteTime >= 3) { rank = "平均的浪費家"; bg = "#00F5FF"; }
+            else { rank = "希少な人間"; bg = "#43A047"; }
+            
+            document.body.style.backgroundColor = bg;
+            document.getElementById('result-rank').innerText = rank;
+            
+            let achList = totalLoss < 10000000 ? achs.low : (totalLoss < 100000000 ? achs.mid : achs.high);
+            document.getElementById('achievementText').innerText = achList[Math.floor(Math.random() * 20)];
+            document.getElementById('jokeText').innerText = jokes[Math.floor(Math.random() * 20)];
+        }, 1200);
+    }
+
+    function shareX() {
+        const rank = document.getElementById('result-rank').innerText;
+        const loss = document.getElementById('totalLossDisplay').innerText;
+        const text = encodeURIComponent(`【判定：${rank}】\n2026年基準の複利で計算した結果、僕がスマホで失う生涯損失額は「${loss}」でした。\n本来なら「${document.getElementById('achievementText').innerText}」\n#生涯損失査定マシン`);
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${window.location.href}`, '_blank');
+    }
+</script>
+</body>
+</html>
